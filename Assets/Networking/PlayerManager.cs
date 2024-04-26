@@ -19,6 +19,7 @@ public class PlayerManager : MonoBehaviour
     {
         //Connection Message
         NetworkManager.GetServer().SendToAll(message,clientid);
+        
     }
 
 

@@ -1,4 +1,5 @@
 ﻿using Riptide;
+using Riptide.Transports.Steam;
 using Riptide.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Assets
     public class ClientInstance : MonoBehaviour
     {
         public Client _instance { get; private set; }
+        public SteamClient _steamClientInstance {  get; private set; }
 
         private string _name, _connectedIp = "",_connectedPort = "";
         public string Name() => _name;
@@ -22,18 +24,14 @@ namespace Assets
         /// <summary>
         /// Takes An Ip Address In The Form Of "127.0.0.1:7777" As A String
         /// </summary>
-        public void ConnectToServer(string ServerIpAddress, string port, string name)
+        public void ConnectToServer(string name)
         {
             if(_instance == null) { Debug.LogError("Instance For Client Is Missing"); }
-            if(ServerIpAddress == "") { Debug.LogError("Empty Ip Provided"); }
 
-
-            _connectedIp = ServerIpAddress;
-            _connectedPort = port;
             _name = name;
 
-            _instance.Connect($"{ServerIpAddress}:{port}");
-            var test = _instance.IsConnecting;
+            _instance.Connect("127.0.0.1",messageHandlerGroupId: NetworkManager.instance.networkHandlerId);
+            Debug.Log(_instance.IsConnecting);
 
 
             //Subrscribe the client to notify the player manager of any connections
@@ -47,8 +45,10 @@ namespace Assets
         {
             if (NetworkManager.instance == null) throw new System.Exception("Missing Server Instance");
 
+            _steamClientInstance = new SteamClient(NetworkManager.instance._steamServerInstance);
+
             //Start the Client
-            _instance = new Client();
+            _instance = new Client(_steamClientInstance);
 
             //Subscribe the client to the update loop
             NetworkManager.InstanceUpdate += _instance.Update;
@@ -65,6 +65,13 @@ namespace Assets
             if (_instance != null) NetworkManager.InstanceUpdate -= _instance.Update;
             if (_instance != null) NetworkManager.InstanceDispose -= Dispose;
             _instance?.Disconnect();
+        
+        
+        }
+
+        private void Update()
+        {
+            Debug.Log("Is Connected = "+_instance.IsConnected);
         }
 
     }

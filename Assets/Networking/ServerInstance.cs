@@ -29,8 +29,8 @@ namespace Assets
             RiptideLogger.Initialize(Debug.Log, Debug.Log, Debug.LogWarning, Debug.LogError, true);
 
             //Start the server
-            _instance = new Server();
-            _instance.Start(PORT, MAXPLAYERCOUNT);
+            _instance = new Server(NetworkManager.instance._steamServerInstance);
+            _instance.Start(0, MAXPLAYERCOUNT,NetworkManager.instance.networkHandlerId);
             _instance.ClientDisconnected += ClientDisconnected;
 
             //Subscribe to the update loop

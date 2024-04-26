@@ -1,5 +1,6 @@
 using Assets;
 using Riptide;
+using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +19,8 @@ public class LobbyManager : MonoBehaviour
     //Lobby Players
     [SerializeField] List<GameObject> players = new(); 
     [SerializeField] List<TextMeshProUGUI> playerTexts = new();
+    [SerializeField] TextMeshProUGUI lobbyCodeDisplay;
+
     static Dictionary<ushort, TextMeshProUGUI> playersToTextDict = new();
 
     //Player Ready Status and count in the lobby
@@ -28,6 +31,13 @@ public class LobbyManager : MonoBehaviour
     void Start()
     {
         NetworkManager.OnClientListReceive += OnClientListUpdate;
+        NetworkManager.OnLobbyCreation += OnLobbyCreation;
+    }
+
+
+    void OnLobbyCreation(LobbyCreated_t callback)
+    {
+        lobbyCodeDisplay.text = callback.m_ulSteamIDLobby.ToString();
     }
 
     void OnClientListUpdate(Dictionary<ushort,string> ClientList)
