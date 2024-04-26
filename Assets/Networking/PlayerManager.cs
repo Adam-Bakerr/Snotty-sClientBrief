@@ -12,6 +12,16 @@ public class PlayerManager : MonoBehaviour
     public static Dictionary<ushort, GameObject> _players = new();
 
 
+    //Middle man for client movement packets that pass throught the server
+    //Doesnt Send The Data To The User That Sent It
+    [MessageHandler((ushort)MessageHelper.messageTypes.PlayerSync)]
+    public static void OnPlayerSyncablePacketReceived(ushort clientid, Message message)
+    {
+        //Connection Message
+        NetworkManager.GetServer().SendToAll(message,clientid);
+    }
+
+
     /// <summary>
     /// Called when another client joins the server
     /// </summary>
@@ -23,6 +33,7 @@ public class PlayerManager : MonoBehaviour
 
     /// <summary>
     /// Called when the local client connects to the server
+    /// Handles Adding The Player To The Client List
     /// </summary>
     public void LocalPlayerConnected(object sender, System.EventArgs e)
     {
@@ -36,8 +47,6 @@ public class PlayerManager : MonoBehaviour
         NetworkManager.GetClient().Send(connectionMessage);
 
     }
-
-
 
     public void ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
     {

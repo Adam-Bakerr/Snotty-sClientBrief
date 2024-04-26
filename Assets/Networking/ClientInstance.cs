@@ -38,6 +38,7 @@ namespace Assets
 
             //Subrscribe the client to notify the player manager of any connections
             _instance.Connected += NetworkManager.instance._playerManager.LocalPlayerConnected;
+            _instance.Disconnected += NetworkManager.ResetInstance;
             _instance.ClientConnected += NetworkManager.instance._playerManager.ClientConnected;
             _instance.ClientDisconnected += NetworkManager.instance._playerManager.ClientDisconnected;
         }

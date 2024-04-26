@@ -6,6 +6,7 @@ using UnityEngine;
 public class Connecting : MonoBehaviour
 {
     [SerializeField] GameObject FailedToConnectMenu;
+    [SerializeField] GameObject LobyMenu;
 
 
     [SerializeField] TextMeshProUGUI m_TextMeshProUGUI;
@@ -57,5 +58,6 @@ public class Connecting : MonoBehaviour
     void Connected(object sender, System.EventArgs e)
     {
         gameObject.SetActive(false);
+        LobyMenu.SetActive(true);
     }
 }

@@ -8,6 +8,7 @@ using Assets;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 #nullable enable
 
@@ -123,6 +124,20 @@ public class NetworkManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         InstanceDispose?.Invoke();
+    }
+
+    /// <summary>
+    /// Resets the game instance back to its inital state
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public static void ResetInstance(object sender, DisconnectedEventArgs e)
+    {
+        Transform NetworkTransform = NetworkManager.instance.transform;
+        Destroy(NetworkTransform.GetComponent<ClientInstance>());
+        Destroy(NetworkTransform.GetComponent<ServerInstance>());
+        Destroy(NetworkTransform.GetComponent<PlayerManager>());
+        SceneManager.LoadScene("Menu");
     }
 
     /// <summary>

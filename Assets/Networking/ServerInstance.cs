@@ -43,6 +43,19 @@ namespace Assets
             
         }
 
+        [MessageHandler((ushort)MessageHelper.messageTypes.LobbyReady)]
+        private static void PlayerReadyMessageHandler(ushort clientid, Message message)
+        {
+            ushort clientId = message.GetUShort();
+            bool isClientReady = message.GetBool();
+
+            Message toClientsMessage = MessageHelper.CreateMessage(MessageHelper.messageTypes.LobbyReady, MessageSendMode.Reliable);
+            toClientsMessage.Add(clientId);
+            toClientsMessage.Add(isClientReady);
+            _instance.SendToAll(toClientsMessage);
+        }
+
+
         [MessageHandler((ushort)MessageHelper.messageTypes.ClientConnection)]
         private static void ClientConnection(ushort clientid, Message message)
         {
@@ -51,6 +64,14 @@ namespace Assets
             Debug.Log($"Client Connected ID: {clientid} With Name {name}");
             SendClientList();
         }
+
+        [MessageHandler((ushort)MessageHelper.messageTypes.GameStart)]
+        private static void StartGame(ushort clientid, Message message)
+        {
+            Message gameStartMessage = MessageHelper.CreateMessage(MessageHelper.messageTypes.GameStart, MessageSendMode.Reliable);
+            _instance.SendToAll(gameStartMessage);
+        }
+
 
         public static void SendClientList()
         {

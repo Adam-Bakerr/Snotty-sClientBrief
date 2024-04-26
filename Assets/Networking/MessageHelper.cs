@@ -17,8 +17,8 @@ namespace Assets
             Byte, Bool, Int, Uint, Float, String, Struct,
             ByteArray, BoolArray, IntArray, UintArray, FloatArray, StringArray, StructArray,
 
-            //Debug Types
-            ClientConnection, ClientList, Movement
+            //Custom Types
+            ClientConnection, ClientList ,LobbyReady ,GameStart , PlayerSync
         }
 
 

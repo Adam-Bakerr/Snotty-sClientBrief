@@ -17,5 +17,16 @@ public class PlayerManagerEditor : Editor
         serializedObject.Update();
 
         PlayerManager script = (PlayerManager)target;
+
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        if (PlayerManager.playerIds != null)
+        {
+            foreach(var player in PlayerManager.playerIds)
+            {
+                EditorGUILayout.LabelField($"{player.Key}  {player.Value}");
+            }
+        }
+        EditorGUILayout.EndVertical();
+
     }
 }

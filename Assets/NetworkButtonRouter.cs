@@ -14,8 +14,7 @@ public class NetworkButtonRouter : MonoBehaviour
 
     public void OnJoinPressed()
     {
-        if (IP.text.Length <= 1 || PORT.text.Length <= 1 || NAME.text.Length <= 1 && IPAddress.TryParse(IP.text,out IPAddress voidOutput)) return;
-
+        if (IP.text.Length <= 0 || PORT.text.Length <= 0 || NAME.text.Length <= 0 && IPAddress.TryParse(IP.text,out IPAddress voidOutput)) return;
         NetworkManager.GetClientInstance().ConnectToServer(IP.text, PORT.text, NAME.text);
         NetworkConnectionMenu.SetActive(false);
         ConnectingMenu.SetActive(true);
