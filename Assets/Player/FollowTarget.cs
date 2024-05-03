@@ -14,6 +14,7 @@ public class FollowTarget : MonoBehaviour
 
     void Update()
     {
+        if(!targetTransform) return;
         transform.position = targetTransform.position;
         transform.rotation = targetTransform.rotation;
         transform.localScale = targetTransform.localScale;

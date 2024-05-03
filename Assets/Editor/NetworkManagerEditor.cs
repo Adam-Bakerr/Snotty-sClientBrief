@@ -31,7 +31,7 @@ public class NetworkManagerEditor : Editor
         GUIStyle style = GUI.skin.box;
         style.normal.textColor = script._clientInstance._instance.IsConnected ? Color.green : Color.red;
         string networkStatus = NetworkManager.GetClient().IsConnected ? "Connected" : "Disconnected";
-        EditorGUILayout.LabelField($"{networkStatus} IP: {NetworkManager.GetClientInstance().ConnectedIP()}:{NetworkManager.GetClientInstance().ConnectedPort()}", style);
+        EditorGUILayout.LabelField($"{networkStatus} Lobby ID: {NetworkManager.GetClientInstance().ConnectedLobbyID()}", style);
 
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.EndVertical();

@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class Connecting : MonoBehaviour
 {
-    [SerializeField] GameObject FailedToConnectMenu;
-    [SerializeField] GameObject LobyMenu;
+    [SerializeField] LobbyManager lobbyManager;
 
 
     [SerializeField] TextMeshProUGUI m_TextMeshProUGUI;
     [SerializeField] float animationTime = .5f;
     [SerializeField] string baseText;
+
 
     int dotCount = 3;
     int currentDotCount = 0;
@@ -47,17 +47,17 @@ public class Connecting : MonoBehaviour
             return;
         }
         m_TextMeshProUGUI.text = baseText;
-
+        
     }
 
     void Failed(object sender, Riptide.ConnectionFailedEventArgs e)
     {
-        FailedToConnectMenu.SetActive(true);
+        lobbyManager.FailedToConnect();
     }
 
     void Connected(object sender, System.EventArgs e)
     {
         gameObject.SetActive(false);
-        LobyMenu.SetActive(true);
+        lobbyManager.SetMenuActive(false);
     }
 }

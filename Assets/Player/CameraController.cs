@@ -19,6 +19,7 @@ public class CameraController : MonoBehaviour
 
     public void Start()
     {
+        Camera.main.transform.GetComponent<FollowTarget>().targetTransform = transform.GetChild(0);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

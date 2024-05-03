@@ -21,6 +21,10 @@ public class LobbyManager : MonoBehaviour
     [SerializeField] List<TextMeshProUGUI> playerTexts = new();
     [SerializeField] TextMeshProUGUI lobbyCodeDisplay;
 
+    //Main Menu Canvas
+    [SerializeField] GameObject mainMenu;
+    [SerializeField] GameObject failedConnectionMenu;
+
     static Dictionary<ushort, TextMeshProUGUI> playersToTextDict = new();
 
     //Player Ready Status and count in the lobby
@@ -32,8 +36,24 @@ public class LobbyManager : MonoBehaviour
     {
         NetworkManager.OnClientListReceive += OnClientListUpdate;
         NetworkManager.OnLobbyCreation += OnLobbyCreation;
+        NetworkManager.GetClient().ClientConnected += LobbyManager_ClientConnected;
     }
 
+    private void LobbyManager_ClientConnected(object sender, ClientConnectedEventArgs e)
+    {
+        NetworkManager.GetClient().ClientConnected -= LobbyManager_ClientConnected;
+        SetMenuActive(false);
+    }
+
+    public void SetMenuActive(bool shouldHideMenu)
+    {
+        mainMenu.SetActive(shouldHideMenu);
+    }
+
+    public void FailedToConnect()
+    {
+        failedConnectionMenu.SetActive(true);
+    }
 
     void OnLobbyCreation(LobbyCreated_t callback)
     {
@@ -68,7 +88,7 @@ public class LobbyManager : MonoBehaviour
     }
 
 
-    [MessageHandler((ushort)MessageHelper.messageTypes.LobbyReady)]
+    [MessageHandler((ushort)MessageHelper.messageTypes.LobbyReady, NetworkManager.networkHandlerId)]
     private static void PlayerReadyMessageHandler(Message message)
     {
         ushort clientId = message.GetUShort();
@@ -93,7 +113,7 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    [MessageHandler((ushort)MessageHelper.messageTypes.GameStart)]
+    [MessageHandler((ushort)MessageHelper.messageTypes.GameStart, NetworkManager.networkHandlerId)]
     private static void GameStartMessageHandler(Message message)
     {
         Debug.Log("Game Starting");

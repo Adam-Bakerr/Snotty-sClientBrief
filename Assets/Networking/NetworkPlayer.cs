@@ -16,7 +16,7 @@ public class NetworkPlayer : MonoBehaviour
     }
 
 
-    [MessageHandler((ushort)MessageHelper.messageTypes.PlayerSync)]
+    [MessageHandler((ushort)MessageHelper.messageTypes.PlayerSync, NetworkManager.networkHandlerId)]
     private static void GameStartMessageHandler(Message message)
     {
         ushort clientID = message.GetUShort();

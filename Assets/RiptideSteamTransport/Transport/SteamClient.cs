@@ -105,7 +105,7 @@ namespace Riptide.Transports.Steam
                 SteamNetworkingConfigValue_t[] options = new SteamNetworkingConfigValue_t[] { };
                 HSteamNetConnection connectionToServer = SteamNetworkingSockets.ConnectP2P(ref serverIdentity, 0, options.Length, options);
 
-                ConnectTimeout();
+                //ConnectTimeout();
                 return new SteamConnection(hostId, connectionToServer, this);
             }
             catch (Exception ex)
@@ -116,14 +116,14 @@ namespace Riptide.Transports.Steam
             }
         }
 
-        private async void ConnectTimeout() // TODO: confirm if this is needed, Riptide *should* take care of timing out the connection
-        {
-            Task timeOutTask = Task.Delay(6000); // TODO: use Riptide Client's TimeoutTime
-            await Task.WhenAny(timeOutTask);
+        //private async void ConnectTimeout() // TODO: confirm if this is needed, Riptide *should* take care of timing out the connection
+        //{
+        //    Task timeOutTask = Task.Delay(6000); // TODO: use Riptide Client's TimeoutTime
+        //    await Task.WhenAny(timeOutTask);
 
-            if (!steamConnection.IsConnected)
-                OnConnectionFailed();
-        }
+        //    if (!steamConnection.IsConnected)
+        //        OnConnectionFailed();
+        //}
 
         private void OnConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t callback)
         {

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using Unity.VisualScripting;
+using Riptide.Transports.Steam;
 
 namespace Assets
 {
@@ -21,29 +22,27 @@ namespace Assets
 
         //The client and server instance for the session
         //Server instance is only avalible to the host
-        public static Server _instance { get; private set; }
+        public Server _instance { get; private set; }
+        public SteamServer _steamServerInstance;
 
         public void OnServerInitalize()
         {
             //Setup debug logger callback with timestaps
             RiptideLogger.Initialize(Debug.Log, Debug.Log, Debug.LogWarning, Debug.LogError, true);
 
+            //Create the steam server instance
+            _steamServerInstance = new SteamServer();
+
             //Start the server
-            _instance = new Server(NetworkManager.instance._steamServerInstance);
-            _instance.Start(0, MAXPLAYERCOUNT,NetworkManager.instance.networkHandlerId);
-            _instance.ClientDisconnected += ClientDisconnected;
+            _instance = new Server(_steamServerInstance);
+            _instance.Start(0, MAXPLAYERCOUNT,NetworkManager.networkHandlerId);
 
             //Subscribe to the update loop
             NetworkManager.InstanceUpdate += _instance.Update;
             NetworkManager.InstanceDispose += _instance.Stop;
         }
 
-        private void ClientDisconnected(object sender, ServerDisconnectedEventArgs e)
-        {
-            
-        }
-
-        [MessageHandler((ushort)MessageHelper.messageTypes.LobbyReady)]
+        [MessageHandler((ushort)MessageHelper.messageTypes.LobbyReady, NetworkManager.networkHandlerId)]
         private static void PlayerReadyMessageHandler(ushort clientid, Message message)
         {
             ushort clientId = message.GetUShort();
@@ -52,24 +51,23 @@ namespace Assets
             Message toClientsMessage = MessageHelper.CreateMessage(MessageHelper.messageTypes.LobbyReady, MessageSendMode.Reliable);
             toClientsMessage.Add(clientId);
             toClientsMessage.Add(isClientReady);
-            _instance.SendToAll(toClientsMessage);
+            NetworkManager.GetServer().SendToAll(toClientsMessage);
         }
 
 
-        [MessageHandler((ushort)MessageHelper.messageTypes.ClientConnection)]
-        private static void ClientConnection(ushort clientid, Message message)
-        {
-            string name = message.GetString();
-            PlayerManager.playerIds.Add(clientid, name);
-            Debug.Log($"Client Connected ID: {clientid} With Name {name}");
-            SendClientList();
-        }
-
-        [MessageHandler((ushort)MessageHelper.messageTypes.GameStart)]
+        [MessageHandler((ushort)MessageHelper.messageTypes.GameStart, NetworkManager.networkHandlerId)]
         private static void StartGame(ushort clientid, Message message)
         {
             Message gameStartMessage = MessageHelper.CreateMessage(MessageHelper.messageTypes.GameStart, MessageSendMode.Reliable);
-            _instance.SendToAll(gameStartMessage);
+            NetworkManager.GetServer().SendToAll(gameStartMessage);
+        }
+
+        [MessageHandler((ushort)MessageHelper.messageTypes.ClientConnection, NetworkManager.networkHandlerId)]
+        private static void ClientConnection(ushort clientid, Message message)
+        {
+            string name = message.GetString();
+            PlayerManager.playerIds.TryAdd(clientid, name);
+            SendClientList();
         }
 
 
@@ -84,7 +82,7 @@ namespace Assets
                 message.Add(keyvaluepair.Value);
             }
 
-            _instance.SendToAll(message);
+            NetworkManager.GetServer().SendToAll(message);
         }
 
         public void OnDestroy()

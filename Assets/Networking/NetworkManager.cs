@@ -5,20 +5,18 @@ using UnityEngine;
 using Riptide;
 using Riptide.Utils;
 using Assets;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine.SceneManagement;
 using Riptide.Transports.Steam;
 using Steamworks;
-using Riptide.Demos.Steam.PlayerHosted;
+using TMPro;
 
 #nullable enable
 
 [DisallowMultipleComponent]
 public class NetworkManager : MonoBehaviour
 {
-    public byte networkHandlerId = 255;
+    public const byte networkHandlerId = 255;
     public CSteamID lobbyID;
 
     //Singleton instance of the network manager
@@ -40,16 +38,15 @@ public class NetworkManager : MonoBehaviour
     public delegate void LobyCreationDelegate(LobbyCreated_t callback);
     public static LobyCreationDelegate OnLobbyCreation;
 
-    //Used When The Lobby is created
-    public delegate void LobyEnterDelegate(LobbyEnter_t callback);
-    public static LobyEnterDelegate OnLobbyEnter;
+    //Used When The Server List Is REceived
+    public delegate void ServerListReceived(List<LobbyInfomation> lobbies);
+    public static ServerListReceived OnServerListUpdate;
 
     //Currently Serialized However This Will Be Controlled From The Menu
     [SerializeField] private bool _isHost = false;
-    public bool getIsHost() => _isHost;
+    [SerializeField] private TMP_InputField passwordField;
 
     //Depending on whether we are a client or a client-server, we may have one or both of these
-    public SteamServer _steamServerInstance;
     public ServerInstance _serverInstance;
     public ClientInstance _clientInstance;
     public PlayerManager _playerManager;
@@ -59,6 +56,19 @@ public class NetworkManager : MonoBehaviour
     protected Callback<LobbyCreated_t> lobbyCreated;
     protected Callback<GameLobbyJoinRequested_t> gameLobbyJoinRequested;
     protected Callback<LobbyEnter_t> lobbyEnter;
+
+    Callback<LobbyMatchList_t> m_LobbyMatchList;
+
+
+    //Getter Functions
+    public static Client? GetClient() => instance?._clientInstance?._instance;
+    public static ClientInstance? GetClientInstance() => instance?._clientInstance;
+    public static Riptide.Transports.Steam.SteamClient? GetSteamClient() => GetClientInstance()?._steamClientInstance;
+    public static Server? GetServer() => instance?._serverInstance?._instance;
+    public static ServerInstance? GetServerInstance() => instance?._serverInstance;
+    public static SteamServer? GetSteamServer() => GetServerInstance()?._steamServerInstance;
+    public bool getIsHost() => _isHost;
+
 
     /// <summary>
     /// Creates a singleton instance of the network manager ensuring only a single instance is present
@@ -83,26 +93,77 @@ public class NetworkManager : MonoBehaviour
                 return;
             }
 
-            _steamServerInstance = new SteamServer();
-
-            //Initalize the server if no other server exists and we are the host
-            if (_serverInstance == null && _isHost)
-            {
-                _serverInstance = transform.AddComponent<ServerInstance>();
-                _serverInstance.OnServerInitalize();
-
-                lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
-                SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly,4);
-
-                //_clientInstance.ConnectToServer("127.0.0.1", _serverInstance.GetPort().ToString(),_clientInstance.name); ;
-            }
-
             _clientInstance = transform.AddComponent<ClientInstance>();
             _clientInstance.OnClientInitalize();
 
+            m_LobbyMatchList = Callback<LobbyMatchList_t>.Create(ListAvalibleLobbies);
             lobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnterCallback);
-
+            gameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
         }
+    }
+
+
+    public static void GetAvalibleLobbies()
+    {
+        SteamMatchmaking.AddRequestLobbyListStringFilter("gameKey", "snotty's subway", ELobbyComparison.k_ELobbyComparisonEqual);
+        SteamAPICall_t hSteamAPICall = SteamMatchmaking.RequestLobbyList();
+    }
+
+    public struct LobbyInfomation {
+        public CSteamID id;
+        public string password;
+        public string? name;
+        public string? nolevel;
+        public int numberOfMembers;
+        public int maxNumberOfMembers;
+    }
+
+
+    private static void ListAvalibleLobbies(LobbyMatchList_t list)
+    {
+        var outlist = new List<LobbyInfomation>();
+        uint numLobbies = list.m_nLobbiesMatching;
+        if (numLobbies <= 0)
+        {
+            Debug.Log("No lobbies");
+        }
+        else
+        {
+            for (var i = 0; i < numLobbies; i++)
+            {
+                var lobby = SteamMatchmaking.GetLobbyByIndex(i);
+                var name = SteamMatchmaking.GetLobbyData(lobby, "name");
+                var serverPassword = SteamMatchmaking.GetLobbyData(lobby, "password");
+                var nolevel = SteamMatchmaking.GetLobbyData(lobby, "nolevel");
+                var nplayers = SteamMatchmaking.GetNumLobbyMembers(lobby);
+                var maxplayers = SteamMatchmaking.GetLobbyMemberLimit(lobby);
+
+                if (name.Length == 0)
+                    continue;
+
+                outlist.Add(new LobbyInfomation() {
+                    id = lobby,
+                    name = name,
+                    password = serverPassword,
+                    nolevel = nolevel,
+                    numberOfMembers = nplayers,
+                    maxNumberOfMembers = maxplayers
+                }); ;
+            }
+        }
+
+        OnServerListUpdate?.Invoke(outlist);
+    }
+
+    private void Awake()
+    {
+        CreateSingltonInstance();
+    }
+
+    public void CreateLobby()
+    {
+        lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, 4);
     }
 
     void OnLobbyCreated(LobbyCreated_t callback)
@@ -115,7 +176,13 @@ public class NetworkManager : MonoBehaviour
 
         lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
 
-        _clientInstance.ConnectToServer("Host");
+        SteamMatchmaking.SetLobbyData(lobbyID, "name", SteamFriends.GetPersonaName());
+        SteamMatchmaking.SetLobbyData(lobbyID, "gameKey", "snotty's subway");
+        SteamMatchmaking.SetLobbyData(lobbyID, "password", passwordField.text);
+
+
+        GetSteamClient()!.ChangeLocalServer(GetSteamServer());
+        _clientInstance.ConnectToLocalServer();
 
         OnLobbyCreation?.Invoke(callback);
     }
@@ -127,55 +194,33 @@ public class NetworkManager : MonoBehaviour
         CSteamID lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
         CSteamID hostId = SteamMatchmaking.GetLobbyOwner(lobbyId);
 
-        _clientInstance._instance.Connect(hostId.ToString(), messageHandlerGroupId: NetworkManager.instance.networkHandlerId);
-        OnLobbyEnter?.Invoke(callback);
-        Debug.Log("This is a connection message");
-    }
-
-    void JoinLobby(ulong lobbyId)
-    {
-        SteamMatchmaking.JoinLobby(new CSteamID(lobbyId));
+        _clientInstance.ConnectToHostID(hostId.ToString());
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback)
     {
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
+        CSteamID hostId = SteamMatchmaking.GetLobbyOwner(callback.m_steamIDLobby);
+        _clientInstance.ConnectToHostID(hostId.ToString());
     }
-
-    public static Client? GetClient()
-    {
-        return NetworkManager.instance!._clientInstance!._instance;
-    }
-
-    
-    public static ClientInstance? GetClientInstance()
-    {
-        return NetworkManager.instance!._clientInstance;
-    }
-
-    public static Server? GetServer()
-    {
-        return ServerInstance._instance;
-    }
-
 
     /// <summary>
     /// Called when transitioning from the menu to the lobby
     /// </summary>
     public void CreateNetwork()
     {
-        CreateSingltonInstance();
         DontDestroyOnLoad(this);
         Debug.developerConsoleEnabled = true;
+
+        //Initalize the server if no other server exists and we are the host
+        if (_serverInstance == null)
+        {
+            _serverInstance = transform.AddComponent<ServerInstance>();
+            _serverInstance.OnServerInitalize();
+        }
     }
 
-    /// <summary>
-    /// Sets The Host Variable Of The Network Manager
-    /// </summary>
-    public void SetHost(bool isHost)
-    {
-        _isHost = isHost;
-    }
+    public void SetHost(bool isHost) => _isHost = isHost;
 
     /// <summary>
     /// Update Client And Server Instances
@@ -183,6 +228,7 @@ public class NetworkManager : MonoBehaviour
     void FixedUpdate()
     {
         if(_clientInstance != null) InstanceUpdate();
+        SteamAPI.RunCallbacks();
     }
 
     /// <summary>
@@ -190,6 +236,10 @@ public class NetworkManager : MonoBehaviour
     /// </summary>
     private void OnApplicationQuit()
     {
+        SteamMatchmaking.LeaveLobby(lobbyID);
+        GetSteamServer()?.Shutdown();
+        GetServer()?.Stop();
+        GetClient()?.Disconnect();
         InstanceDispose?.Invoke();
     }
 
@@ -210,7 +260,7 @@ public class NetworkManager : MonoBehaviour
     /// <summary>
     /// Receive the clientlist from the server
     /// </summary>
-    [MessageHandler((ushort)MessageHelper.messageTypes.ClientList)]
+    [MessageHandler((ushort)MessageHelper.messageTypes.ClientList, NetworkManager.networkHandlerId)]
     private static void ClientList(Message message)
     {
         Dictionary<ushort, string> clients = new();
