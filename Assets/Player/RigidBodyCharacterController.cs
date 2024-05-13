@@ -63,6 +63,11 @@ public class RigidBodyCharacterController : MonoBehaviour
 
     private void Update()
     {
+        if (PlayerInputManager.isPaused)
+        {
+            return;
+        }
+
         QueueJump();
 
         // Set movement state.

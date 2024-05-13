@@ -18,7 +18,8 @@ namespace Assets
             ByteArray, BoolArray, IntArray, UintArray, FloatArray, StringArray, StructArray,
 
             //Custom Types
-            ClientConnection, ClientList ,LobbyReady ,GameStart , PlayerSync
+            ClientConnection, ClientList ,LobbyReady ,GameStart , PlayerTransformSync, StatSync,
+            SpawnCollectables, CollectablePickedUp
         }
 
 

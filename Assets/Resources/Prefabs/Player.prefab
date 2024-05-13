@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1382146139220993311}
   - component: {fileID: 3650916016278690309}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: HandPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59,7 +59,7 @@ GameObject:
   - component: {fileID: 3286750019082303555}
   - component: {fileID: 1544627722384178253}
   - component: {fileID: 339534805146390382}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Torch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78,7 +78,8 @@ Transform:
   m_LocalPosition: {x: 0.255, y: 0.126, z: 0.672}
   m_LocalScale: {x: 0.1, y: 0.18208, z: 0.1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1261935477400407071}
   m_Father: {fileID: 1382146139220993311}
   m_LocalEulerAnglesHint: {x: -2.992, y: -94.613, z: -101.248}
 --- !u!33 &3286750019082303555
@@ -154,6 +155,100 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1562123653172281839
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1261935477400407071}
+  - component: {fileID: 577914247161778084}
+  m_Layer: 6
+  m_Name: Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1261935477400407071
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562123653172281839}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.7760464, y: 0, z: 0, w: 0.63067585}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8229197090305220963}
+  m_LocalEulerAnglesHint: {x: -101.8, y: 0, z: 0}
+--- !u!108 &577914247161778084
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562123653172281839}
+  m_Enabled: 1
+  serializedVersion: 10
+  m_Type: 0
+  m_Shape: 0
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 3
+  m_Range: 25
+  m_SpotAngle: 70.5
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!1 &1573274378512574037
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,13 +261,12 @@ GameObject:
   - component: {fileID: 670432706177273868}
   - component: {fileID: 1464437117839668018}
   - component: {fileID: 4192304875230163315}
-  - component: {fileID: 6577318626628878181}
   - component: {fileID: -859427408751455672}
   - component: {fileID: 5878891574359762173}
   - component: {fileID: 7884355632481113929}
   - component: {fileID: 234398335593571553}
   - component: {fileID: 4105532175519601996}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,7 +353,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -271,29 +365,6 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!136 &6577318626628878181
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1573274378512574037}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &-859427408751455672
 MonoBehaviour:
@@ -476,6 +547,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 471a2a64-0c6c-4355-8248-5ad75f0a1419
     m_ActionName: Player/Sprint[/Keyboard/shift]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 234398335593571553}
+        m_TargetAssemblyTypeName: PlayerInputManager, Assembly-CSharp
+        m_MethodName: OnPausePressed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: ae19f540-720f-4809-8047-7ebaa7a57309
+    m_ActionName: Player/Pause[/Keyboard/escape]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -499,6 +586,7 @@ MonoBehaviour:
   isJumpPressed: 0
   isJumpReleased: 0
   isSprinting: 0
+  isPaused: 0
 --- !u!114 &4105532175519601996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -511,6 +599,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70503787ac258ab4ea3520f148d1fe5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraPivot: {fileID: 7046436590005089375}
 --- !u!1 &8226638258305947292
 GameObject:
   m_ObjectHideFlags: 0
@@ -520,7 +609,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7046436590005089375}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: cameraPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}

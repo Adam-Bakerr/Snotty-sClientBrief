@@ -78,20 +78,22 @@ public class NetworkManager : MonoBehaviour
         if (instance != null && instance != this)
         {
             Destroy(this);
+            return;
         }
         else
         {
+            if(!SteamManager.Initialized) _steamManager = transform.AddComponent<SteamManager>();
+          
+            if (!SteamManager.Initialized)
+            {
+                throw new Exception("Steam is not initialized!");
+            }
+
+
             //Initalize the singleton instance
             instance = this;
 
             _playerManager = transform.AddComponent<PlayerManager>();
-            _steamManager = transform.AddComponent<SteamManager>();
-
-            if (!SteamManager.Initialized)
-            {
-                Debug.LogError("Steam is not initialized!");
-                return;
-            }
 
             _clientInstance = transform.AddComponent<ClientInstance>();
             _clientInstance.OnClientInitalize();
@@ -125,7 +127,6 @@ public class NetworkManager : MonoBehaviour
         uint numLobbies = list.m_nLobbiesMatching;
         if (numLobbies <= 0)
         {
-            Debug.Log("No lobbies");
         }
         else
         {
@@ -155,14 +156,21 @@ public class NetworkManager : MonoBehaviour
         OnServerListUpdate?.Invoke(outlist);
     }
 
-    private void Awake()
+    private void Start()
     {
         CreateSingltonInstance();
     }
 
+    bool isFirstInit = true;
+
     public void CreateLobby()
     {
-        lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+        if (isFirstInit)
+        {
+            lobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
+            isFirstInit = false;
+        }
+
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, 4);
     }
 
@@ -178,11 +186,25 @@ public class NetworkManager : MonoBehaviour
 
         SteamMatchmaking.SetLobbyData(lobbyID, "name", SteamFriends.GetPersonaName());
         SteamMatchmaking.SetLobbyData(lobbyID, "gameKey", "snotty's subway");
+
+
+        if(passwordField.IsUnityNull())
+        {
+            var inputs = FindObjectsOfType<TMP_InputField>(true);
+            foreach(var input in inputs)
+            {
+                if(input.name == "HostPasswordInput")
+                {
+                    passwordField = input;
+                }
+            }
+        }
+
         SteamMatchmaking.SetLobbyData(lobbyID, "password", passwordField.text);
 
-
-        GetSteamClient()!.ChangeLocalServer(GetSteamServer());
-        _clientInstance.ConnectToLocalServer();
+        Riptide.Transports.Steam.SteamClient steamclient = GetSteamClient();
+        steamclient.ChangeLocalServer(GetSteamServer());
+        _clientInstance.ConnectToLocalServer(lobbyID);
 
         OnLobbyCreation?.Invoke(callback);
     }
@@ -194,14 +216,14 @@ public class NetworkManager : MonoBehaviour
         CSteamID lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
         CSteamID hostId = SteamMatchmaking.GetLobbyOwner(lobbyId);
 
-        _clientInstance.ConnectToHostID(hostId.ToString());
+        _clientInstance.ConnectToHostID(hostId);
     }
 
     private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback)
     {
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
         CSteamID hostId = SteamMatchmaking.GetLobbyOwner(callback.m_steamIDLobby);
-        _clientInstance.ConnectToHostID(hostId.ToString());
+        _clientInstance.ConnectToHostID(hostId);
     }
 
     /// <summary>
@@ -228,7 +250,6 @@ public class NetworkManager : MonoBehaviour
     void FixedUpdate()
     {
         if(_clientInstance != null) InstanceUpdate();
-        SteamAPI.RunCallbacks();
     }
 
     /// <summary>
@@ -243,18 +264,25 @@ public class NetworkManager : MonoBehaviour
         InstanceDispose?.Invoke();
     }
 
-    /// <summary>
-    /// Resets the game instance back to its inital state
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public static void ResetInstance(object sender, DisconnectedEventArgs e)
+    public void ShutdownServer()
     {
-        Transform NetworkTransform = NetworkManager.instance.transform;
-        Destroy(NetworkTransform.GetComponent<ClientInstance>());
-        Destroy(NetworkTransform.GetComponent<ServerInstance>());
-        Destroy(NetworkTransform.GetComponent<PlayerManager>());
-        SceneManager.LoadScene("Menu");
+        GetClient()?.Disconnect();
+
+        if (_isHost)
+        {
+            GetServer()?.Stop();
+        }
+
+        SteamMatchmaking.LeaveLobby(_clientInstance.ConnectedLobbyID());
+
+        //If not disposed the callbacks will be called more than once
+        //this caused major issues that took over an hour to find....
+        lobbyCreated.Dispose();
+        gameLobbyJoinRequested.Dispose();
+        lobbyEnter.Dispose();
+
+        instance = null;
+        Destroy(gameObject);
     }
 
     /// <summary>

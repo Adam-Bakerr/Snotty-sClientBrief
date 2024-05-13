@@ -22,6 +22,7 @@ public class CameraController : MonoBehaviour
         Camera.main.transform.GetComponent<FollowTarget>().targetTransform = transform.GetChild(0);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        PlayerInputManager.OnGamePaused += SetCursorLock;
     }
 
     public void LookRotation(Transform character, Transform CamPiv)
@@ -40,10 +41,15 @@ public class CameraController : MonoBehaviour
     public void SetCursorLock(bool value)
     {
         m_LockCursor = value;
-        if (!m_LockCursor)
+        if (m_LockCursor)
         {//we force unlock the cursor if the user disable the cursor locking helper
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
     }
 

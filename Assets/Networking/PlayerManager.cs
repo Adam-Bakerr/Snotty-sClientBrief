@@ -14,11 +14,33 @@ public class PlayerManager : MonoBehaviour
 
     //Middle man for client movement packets that pass throught the server
     //Doesnt Send The Data To The User That Sent It
-    [MessageHandler((ushort)MessageHelper.messageTypes.PlayerSync, NetworkManager.networkHandlerId)]
+    [MessageHandler((ushort)MessageHelper.messageTypes.PlayerTransformSync, NetworkManager.networkHandlerId)]
     public static void OnPlayerSyncablePacketReceived(ushort clientid, Message message)
     {
         //Connection Message
         NetworkManager.GetServer().SendToAll(message,clientid);
+    }
+
+
+    [MessageHandler((ushort)MessageHelper.messageTypes.PlayerTransformSync, NetworkManager.networkHandlerId)]
+    public static void OnPlayerSyncablePacketReceived(Message message)
+    {
+        ushort clientID = message.GetUShort();
+
+        Player.SyncableTransform messageTransform = message.GetSerializable<Player.SyncableTransform>();
+
+        if(_players.TryGetValue(clientID,out GameObject go))
+        {
+            if (!go) return;
+            Transform clientTransform = go.transform;
+            clientTransform.position = messageTransform.Position;
+            clientTransform.eulerAngles = messageTransform.EulerAngles;
+            clientTransform.localScale = messageTransform.Scale;
+        }
+        else
+        {
+            Debug.Log($"Missing Network Player For ID: {clientID}");
+        }
     }
 
     public static void ClientDisconnected(object sender, ClientDisconnectedEventArgs e)
@@ -35,4 +57,5 @@ public class PlayerManager : MonoBehaviour
 
         ServerInstance.SendClientList();
     }
+
 }

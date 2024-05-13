@@ -19,34 +19,37 @@ namespace Assets
         public Client _instance { get; private set; }
         public Riptide.Transports.Steam.SteamClient _steamClientInstance {  get; private set; }
 
-        private string _name, _connectedLobbyID;
+        private string _name;
+        CSteamID _connectedLobbyID;
         public string Name() => _name;
-        public string ConnectedLobbyID() => _connectedLobbyID;
+        public CSteamID ConnectedLobbyID() => _connectedLobbyID;
 
 
         /// <summary>
         /// Takes An Ip Address In The Form Of "127.0.0.1:7777" As A String
         /// </summary>
-        public void ConnectToLocalServer()
+        public void ConnectToLocalServer(CSteamID lobbyID)
         {
             if(_instance == null) { Debug.LogError("Instance For Client Is Missing"); }
-            _name = SteamFriends.GetPersonaName() + "\n (Host)";
-           
+            _name = SteamFriends.GetPersonaName();
+            _connectedLobbyID = lobbyID;
             _instance.Connect("127.0.0.1",messageHandlerGroupId: NetworkManager.networkHandlerId);
             _instance.Connected += OnConnectedToServer;
         }
 
 
-        public void ConnectToHostID(string hostID)
+        public void ConnectToHostID(CSteamID lobbyID)
         {
-            _instance.Connect(hostID, messageHandlerGroupId: NetworkManager.networkHandlerId);
-            _connectedLobbyID = hostID;
+            _instance.Connect(lobbyID.ToString(), messageHandlerGroupId: NetworkManager.networkHandlerId);
+            _connectedLobbyID = lobbyID;
             _name = SteamFriends.GetPersonaName();
             _steamClientInstance.Connected += OnConnectedToServer;
         }
 
         private void OnConnectedToServer(object sender, EventArgs e)
         {
+            _instance.Connection.CanTimeout = false;
+
             Message ConnectionMessage = Message.Create(MessageSendMode.Reliable, (ushort)MessageHelper.messageTypes.ClientConnection);
             ConnectionMessage.Add(_name);
             _instance.Send(ConnectionMessage);
@@ -76,9 +79,9 @@ namespace Assets
         /// </summary>
         private void Dispose()
         {
+            SteamMatchmaking.LeaveLobby(_connectedLobbyID);
             if (_instance != null) NetworkManager.InstanceUpdate -= _instance.Update;
             if (_instance != null) NetworkManager.InstanceDispose -= Dispose;
-            _instance?.Disconnect();
         }
 
     }

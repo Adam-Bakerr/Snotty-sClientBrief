@@ -89,6 +89,7 @@ namespace Assets
         {
             if (_instance != null) NetworkManager.InstanceUpdate -= _instance.Update;
             _instance?.Stop();
+
         }
 
 

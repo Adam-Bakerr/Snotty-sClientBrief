@@ -1,0 +1,60 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class Connecting : MonoBehaviour
+{
+    [SerializeField] LobbyManager lobbyManager;
+
+
+    [SerializeField] TextMeshProUGUI m_TextMeshProUGUI;
+    [SerializeField] float animationTime = .5f;
+    [SerializeField] string baseText;
+
+    float currentTime = 0;
+
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        NetworkManager.GetClient().ConnectionFailed += Failed;
+        NetworkManager.GetClient().Connected += Connected;
+    }
+
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        currentTime += Time.fixedDeltaTime;
+
+        if((currentTime % (animationTime * 4)) > (animationTime * 3f))
+        {
+            m_TextMeshProUGUI.text = $"{baseText}...";
+            return;
+        }
+        if ((currentTime % (animationTime * 4)) > (animationTime * 2f))
+        {
+            m_TextMeshProUGUI.text = $"{baseText}..";
+            return;
+        }
+        if ((currentTime % (animationTime * 4)) > (animationTime))
+        {
+            m_TextMeshProUGUI.text = $"{baseText}.";
+            return;
+        }
+        m_TextMeshProUGUI.text = baseText;
+        
+    }
+
+    void Failed(object sender, Riptide.ConnectionFailedEventArgs e)
+    {
+        lobbyManager.FailedToConnect();
+    }
+
+    void Connected(object sender, System.EventArgs e)
+    {
+        gameObject.SetActive(false);
+        lobbyManager.SetMenuActive(false);
+    }
+}
