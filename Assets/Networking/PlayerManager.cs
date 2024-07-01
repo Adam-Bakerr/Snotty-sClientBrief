@@ -10,6 +10,8 @@ public class PlayerManager : MonoBehaviour
     //Player List
     public static Dictionary<ushort,string> playerIds = new(); 
     public static Dictionary<ushort, GameObject> _players = new();
+    public static Dictionary<GameObject,Downable> _downablePlayers = new();
+    public static Dictionary<GameObject,Downable> _downedPlayers = new();
 
 
     //Middle man for client movement packets that pass throught the server

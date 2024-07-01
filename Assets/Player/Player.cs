@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] PlayerInputManager inputManager;
     [SerializeField] Transform cameraPivot;
 
     public struct SyncableTransform : IMessageSerializable
@@ -72,7 +71,6 @@ public class Player : MonoBehaviour
             this.CurrentXPToNextRank = message.GetInt();
         }
     }
-
     public void Update()
     {
         if (NetworkManager.instance.IsUnityNull()) return;
@@ -86,7 +84,6 @@ public class Player : MonoBehaviour
 
         NetworkManager.GetClient().Send(message);
     }
-
     public void SyncPlayerStats()
     {
         Message message = MessageHelper.CreateMessage(MessageHelper.messageTypes.StatSync, MessageSendMode.Reliable);
@@ -97,12 +94,3 @@ public class Player : MonoBehaviour
         NetworkManager.GetClient().Send(message);
     }
 }
-
-//[CustomEditor(typeof(Player))]
-//public class PlayerEditor : Editor
-//{
-//    public override void OnInspectorGUI()
-//    {
-//        EditorGUILayout.LabelField("Syncs The Players Position With The Server");
-//    }
-//}

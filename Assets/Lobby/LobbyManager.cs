@@ -72,6 +72,10 @@ public class LobbyManager : MonoBehaviour
     void OnLobbyCreation(LobbyCreated_t callback)
     {
         lobbyCodeDisplay.text = callback.m_ulSteamIDLobby.ToString();
+        PlayerManager.playerIds.Clear();
+        PlayerManager._players.Clear();
+        PlayerManager._downedPlayers.Clear();
+        PlayerManager._downablePlayers.Clear();
     }
 
     void OnClientListUpdate(Dictionary<ushort,string> ClientList)

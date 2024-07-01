@@ -22,11 +22,13 @@ public class ServerList : MonoBehaviour
 
     private void OnEnable()
     {
+        ClearButtons();
         RefreshServerList();
     }
 
     private void Awake()
     {
+        ClearButtons();
         NetworkManager.GetAvalibleLobbies();
     }
 
@@ -42,6 +44,7 @@ public class ServerList : MonoBehaviour
 
     public void RefreshServerList()
     {
+        ClearButtons();
         NetworkManager.GetAvalibleLobbies();
     }
 
@@ -59,6 +62,15 @@ public class ServerList : MonoBehaviour
             go.GetComponent<Button>().onClick.AddListener(() => OnButtonClick(lobbyInfo));
             buttonPairs.Add(go,lobbyInfo);
         }
+    }
+
+    public void ClearButtons() {
+        foreach(var button in buttonPairs)
+        {
+            Destroy(button.Key);
+        }
+
+        buttonPairs.Clear();
     }
 
     private void OnButtonClick(NetworkManager.LobbyInfomation lobbyInfo)

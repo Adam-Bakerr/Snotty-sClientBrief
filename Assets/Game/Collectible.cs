@@ -71,7 +71,7 @@ public class Collectible : MonoBehaviour
                         collectableManager = collectableManagerObject.AddComponent<CollectableManager>();
                     }
                 }
-                collectableManager.AddPrefab("/Prefabs/Collectables/" + objectClicked.name + ".prefab");
+               
             }
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);

@@ -13,12 +13,17 @@ public class PlayerInputManager : MonoBehaviour
     public bool isJumpPressed = false;
     public bool isJumpReleased = false;
     public bool isSprinting = false;
+    public static bool isInteracting = false;
     public static bool isPaused = false;
+    public static bool isGameOver = false;
 
 
     //Events
     public delegate void OnPausePressedDeletgate(bool isPaused);
     public static OnPausePressedDeletgate OnGamePaused;
+
+    public delegate void OnInteractDelegate();
+    public static OnInteractDelegate OnInteract;
 
     public void Start()
     {
@@ -50,11 +55,27 @@ public class PlayerInputManager : MonoBehaviour
 
     public void OnPausePressed(InputAction.CallbackContext context)
     {
-        if (context.action.WasPressedThisFrame())
+        if (context.action.WasPressedThisFrame() && !isGameOver)
         {
             isPaused = !isPaused;
             OnGamePaused?.Invoke(isPaused);
         }
     }
+
+    public void OnInteractPressed(InputAction.CallbackContext context)
+    {
+        if (context.action.WasPressedThisFrame())
+        {
+            OnInteract?.Invoke();
+            isInteracting = true;
+        }
+
+        if (context.action.WasReleasedThisFrame())
+        {
+            isInteracting = false;
+        }
+    }
+
+    
 
 }

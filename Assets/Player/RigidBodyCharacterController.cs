@@ -33,6 +33,7 @@ public class RigidBodyCharacterController : MonoBehaviour
 
     [Header("Input")]
     [SerializeField] PlayerInputManager playerInputManager;
+    [SerializeField] Downable playerDownableScript;
 
     [Header("Aiming")]
     [SerializeField] public CameraController m_camera;
@@ -55,7 +56,7 @@ public class RigidBodyCharacterController : MonoBehaviour
 
 
     public CharacterController m_Character;
-    private Vector3 m_PlayerVelocity = Vector3.zero;
+    public Vector3 m_PlayerVelocity = Vector3.zero;
 
     // Used to queue the next jump just before hitting the ground.
     private bool m_JumpQueued = false;
@@ -63,12 +64,18 @@ public class RigidBodyCharacterController : MonoBehaviour
 
     private void Update()
     {
-        if (PlayerInputManager.isPaused)
+        //Stop the player moving if the game is paused
+        if (PlayerInputManager.isPaused || playerDownableScript.isDown)
         {
-            return;
+            playerInputManager.MoveInput = Vector2.zero;
+        }
+        else
+        {
+            QueueJump();
         }
 
-        QueueJump();
+ 
+        
 
         // Set movement state.
         if (m_Character.isGrounded)

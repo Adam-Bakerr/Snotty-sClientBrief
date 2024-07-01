@@ -37,6 +37,13 @@ namespace Assets
             _instance.Connected += OnConnectedToServer;
         }
 
+        private void OnDisconnect(object sender, Riptide.Transports.DisconnectedEventArgs e)
+        {
+            GameplayManager.SendClientToMenu?.Invoke();
+            PlayerInputManager.OnGamePaused?.Invoke(true);
+            Dispose();
+        }
+
 
         public void ConnectToHostID(CSteamID lobbyID)
         {
@@ -44,6 +51,7 @@ namespace Assets
             _connectedLobbyID = lobbyID;
             _name = SteamFriends.GetPersonaName();
             _steamClientInstance.Connected += OnConnectedToServer;
+            _steamClientInstance.Disconnected += OnDisconnect;
         }
 
         private void OnConnectedToServer(object sender, EventArgs e)
@@ -77,11 +85,12 @@ namespace Assets
         /// <summary>
         /// Dispose Of The Network Before We Close The Session
         /// </summary>
-        private void Dispose()
+        public void Dispose()
         {
             SteamMatchmaking.LeaveLobby(_connectedLobbyID);
-            if (_instance != null) NetworkManager.InstanceUpdate -= _instance.Update;
-            if (_instance != null) NetworkManager.InstanceDispose -= Dispose;
+            NetworkManager.InstanceUpdate -= _instance.Update;
+            _steamClientInstance.Disconnected -= OnDisconnect;
+            NetworkManager.InstanceDispose -= Dispose;
         }
 
     }

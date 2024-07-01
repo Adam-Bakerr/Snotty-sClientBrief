@@ -23,10 +23,17 @@ public class CameraController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         PlayerInputManager.OnGamePaused += SetCursorLock;
+        GameplayManager.GameCompleted += SetCursorLock;
+        GameplayManager.GameFailed += SetCursorLock;
     }
 
     public void LookRotation(Transform character, Transform CamPiv)
     {
+        if (PlayerInputManager.isPaused)
+        {
+            return;
+        }
+
         Vector2 mouseInput = inputManager.MouseInput;
         mouseInput.x *= m_XSensitivity;
         mouseInput.y *= -m_YSensitivity;
@@ -37,6 +44,7 @@ public class CameraController : MonoBehaviour
         CamPiv.localRotation = Quaternion.Euler(CurrentLook.y, CurrentLook.x, 0);
 
     }
+
 
     public void SetCursorLock(bool value)
     {
@@ -70,5 +78,12 @@ public class CameraController : MonoBehaviour
 
         return q;
         
+    }
+
+    private void OnDestroy()
+    {
+        PlayerInputManager.OnGamePaused -= SetCursorLock;
+        GameplayManager.GameCompleted -= SetCursorLock;
+        GameplayManager.GameFailed -= SetCursorLock;
     }
 }

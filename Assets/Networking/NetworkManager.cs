@@ -92,6 +92,7 @@ public class NetworkManager : MonoBehaviour
 
             //Initalize the singleton instance
             instance = this;
+            DontDestroyOnLoad(this);
 
             _playerManager = transform.AddComponent<PlayerManager>();
 
@@ -249,7 +250,7 @@ public class NetworkManager : MonoBehaviour
     /// </summary>
     void FixedUpdate()
     {
-        if(_clientInstance != null) InstanceUpdate();
+        if(_clientInstance != null) InstanceUpdate?.Invoke();
     }
 
     /// <summary>
@@ -266,6 +267,9 @@ public class NetworkManager : MonoBehaviour
 
     public void ShutdownServer()
     {
+        SteamMatchmaking.LeaveLobby(_clientInstance.ConnectedLobbyID());
+
+        GetClientInstance()?.Dispose();
         GetClient()?.Disconnect();
 
         if (_isHost)
@@ -273,13 +277,11 @@ public class NetworkManager : MonoBehaviour
             GetServer()?.Stop();
         }
 
-        SteamMatchmaking.LeaveLobby(_clientInstance.ConnectedLobbyID());
-
         //If not disposed the callbacks will be called more than once
         //this caused major issues that took over an hour to find....
-        lobbyCreated.Dispose();
-        gameLobbyJoinRequested.Dispose();
-        lobbyEnter.Dispose();
+        lobbyCreated?.Dispose();
+        gameLobbyJoinRequested?.Dispose();
+        lobbyEnter?.Dispose();
 
         instance = null;
         Destroy(gameObject);
